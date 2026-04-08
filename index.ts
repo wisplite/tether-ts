@@ -1,48 +1,53 @@
-const subscribedQueries = new Map<string, (data: any) => void>();
-let ws: WebSocket | null = null;
+export class TetherClient {
+    private ws: WebSocket | null = null;
+    private subscribedQueries = new Map<string, (data: any) => void>();
 
-export const connect = async (url: string): Promise<WebSocket> => {
-    ws = new WebSocket(url);
-    ws.onopen = () => {
-        console.log('Connected to Tether');
+    connect = (url: string) => {
+        this.ws = new WebSocket(url);
+        this.ws.onopen = () => {
+            console.log('Connected to Tether');
+        };
+        this.ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'query') {
+                this.subscribedQueries.forEach((callback, query) => {
+                    if (data.query === query) {
+                        callback(data.data);
+                    }
+                });
+            } else if (data.type === 'error') {
+                console.error(data.error);
+            }
+        };
+        this.ws.onclose = () => {
+            console.log('Disconnected from Tether');
+        };
     };
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'query') {
-            subscribedQueries.forEach((callback, query) => {
-                if (data.query === query) {
-                    callback(data.data);
-                }
-            });
-        } else if (data.type === 'error') {
-            console.error(data.error);
+    
+    disconnect = () => {
+        if (!this.ws) {
+            throw new Error('Not connected to Tether');
         }
+        this.ws.close();
+        this.ws = null;
     };
-    ws.onclose = () => {
-        console.log('Disconnected from Tether');
+    
+    subscribe = (query: string, callback: (data: any) => void) => {
+        this.subscribedQueries.set(query, callback);
     };
-    return ws;
-};
-
-export const disconnect = (ws: WebSocket) => {
-    ws.close();
-};
-
-export const subscribe = (query: string, callback: (data: any) => void) => {
-    subscribedQueries.set(query, callback);
-};
-
-export const unsubscribe = (query: string) => {
-    subscribedQueries.delete(query);
-};
-
-export const sendMutation = (mutationName: string, params: any) => {
-    if (!ws) {
-        throw new Error('Not connected to Tether');
-    }
-    ws.send(JSON.stringify({
-        type: 'mutation',
-        name: mutationName,
-        payload: params,
-    }));
-};
+    
+    unsubscribe = (query: string) => {
+        this.subscribedQueries.delete(query);
+    };
+    
+    sendMutation = (mutationName: string, params: any) => {
+        if (!this.ws) {
+            throw new Error('Not connected to Tether');
+        }
+        this.ws.send(JSON.stringify({
+            type: 'mutation',
+            name: mutationName,
+            payload: params,
+        }));
+    };
+}

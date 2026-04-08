@@ -1,6 +1,6 @@
 {
   "name": "tether-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TypeScript client for Tether",
   "license": "ISC",
   "author": "wisplite",
