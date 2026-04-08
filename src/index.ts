@@ -34,10 +34,24 @@ export class TetherClient {
     
     subscribe = (query: string, callback: (data: any) => void) => {
         this.subscribedQueries.set(query, callback);
+        if (!this.ws) {
+            throw new Error('Not connected to Tether');
+        }
+        this.ws.send(JSON.stringify({
+            type: 'subscribe',
+            query: query
+        }));
     };
     
     unsubscribe = (query: string) => {
         this.subscribedQueries.delete(query);
+        if (!this.ws) {
+            throw new Error('Not connected to Tether');
+        }
+        this.ws.send(JSON.stringify({
+            type: 'unsubscribe',
+            query: query
+        }));
     };
     
     sendMutation = (mutationName: string, params: any) => {
