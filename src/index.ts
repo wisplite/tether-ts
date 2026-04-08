@@ -25,7 +25,7 @@ export class TetherClient {
     };
     
     disconnect = () => {
-        if (!this.ws) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             throw new Error('Not connected to Tether');
         }
         this.ws.close();
@@ -34,7 +34,7 @@ export class TetherClient {
     
     subscribe = (query: string, callback: (data: any) => void) => {
         this.subscribedQueries.set(query, callback);
-        if (!this.ws) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             throw new Error('Not connected to Tether');
         }
         this.ws.send(JSON.stringify({
@@ -45,7 +45,7 @@ export class TetherClient {
     
     unsubscribe = (query: string) => {
         this.subscribedQueries.delete(query);
-        if (!this.ws) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             throw new Error('Not connected to Tether');
         }
         this.ws.send(JSON.stringify({
@@ -55,7 +55,7 @@ export class TetherClient {
     };
     
     sendMutation = (mutationName: string, params: any) => {
-        if (!this.ws) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             throw new Error('Not connected to Tether');
         }
         this.ws.send(JSON.stringify({
