@@ -1,11 +1,11 @@
 {
   "name": "tether-ts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "TypeScript client for Tether",
   "license": "ISC",
   "author": "wisplite",
   "type": "module",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
