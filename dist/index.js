@@ -4,6 +4,12 @@ export class TetherClient {
     subscribedQueries = new Map();
     connect = (url) => {
         this.websocketHandler.startConnection(url);
+        this.websocketHandler.onQuery = (location, data) => {
+            if (location) {
+                const callback = this.subscribedQueries.get(location);
+                callback?.(data);
+            }
+        };
     };
     disconnect = () => {
         this.websocketHandler.close();

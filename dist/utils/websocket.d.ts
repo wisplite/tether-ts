@@ -1,9 +1,9 @@
 export declare class WebSocketHandler {
     private ws;
     private url;
-    private subscribedQueries;
-    private onOpen;
-    private onClose;
+    onOpen: () => void;
+    onQuery: (location: string | undefined, data: any) => void;
+    onClose: () => void;
     private reconnectAttempts;
     private maxReconnectAttempts;
     private reconnectInterval;

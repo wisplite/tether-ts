@@ -1,9 +1,9 @@
 export class WebSocketHandler {
     private ws: WebSocket | null = null;
     private url: string = '';
-    private subscribedQueries = new Map<string, (data: any) => void>();
-    private onOpen: () => void = () => {};
-    private onClose: () => void = () => {};
+    public onOpen: () => void = () => {};
+    public onQuery: (location: string | undefined, data: any) => void = () => {};
+    public onClose: () => void = () => {};
     private reconnectAttempts: number = 0;
     private maxReconnectAttempts: number = 5;
     private reconnectInterval: number = 1000;
@@ -27,16 +27,12 @@ export class WebSocketHandler {
         ws.onmessage = (event: MessageEvent) => {
             const data = JSON.parse(String(event.data)) as {
                 type: string;
-                query?: string;
+                location?: string;
                 data?: unknown;
                 error?: string;
             };
             if (data.type === 'query') {
-                this.subscribedQueries.forEach((callback, query) => {
-                    if (data.query === query) {
-                        callback(data.data);
-                    }
-                });
+                this.onQuery(data.location, data.data);
             } else if (data.type === 'error') {
                 console.error(data.error);
             }
