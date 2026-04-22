@@ -14,11 +14,12 @@ export class TetherClient {
     disconnect = () => {
         this.websocketHandler.close();
     };
-    subscribe = (query, callback) => {
-        this.subscribedQueries.set(query, callback);
+    subscribe = (queryName, params, callback) => {
+        this.subscribedQueries.set(queryName, callback);
         this.websocketHandler.send(JSON.stringify({
             type: 'subscribe',
-            query: query
+            location: queryName,
+            params: params
         }));
     };
     unsubscribe = (query) => {
@@ -32,7 +33,7 @@ export class TetherClient {
         this.websocketHandler.send(JSON.stringify({
             type: 'mutation',
             name: mutationName,
-            payload: params,
+            params: params,
         }));
     };
 }

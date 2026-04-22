@@ -17,11 +17,12 @@ export class TetherClient {
         this.websocketHandler.close();
     };
     
-    subscribe = (query: string, callback: (data: any) => void) => {
-        this.subscribedQueries.set(query, callback);
+    subscribe = (queryName: string, params: any, callback: (data: any) => void) => {
+        this.subscribedQueries.set(queryName, callback);
         this.websocketHandler.send(JSON.stringify({
             type: 'subscribe',
-            query: query
+            location: queryName,
+            params: params
         }));
     };
     
@@ -37,7 +38,7 @@ export class TetherClient {
         this.websocketHandler.send(JSON.stringify({
             type: 'mutation',
             name: mutationName,
-            payload: params,
+            params: params,
         }));
     };
 }
