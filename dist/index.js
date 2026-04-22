@@ -1,60 +1,29 @@
+import { WebSocketHandler } from './utils/websocket.js';
 export class TetherClient {
-    ws = null;
+    websocketHandler = new WebSocketHandler();
     subscribedQueries = new Map();
     connect = (url) => {
-        this.ws = new WebSocket(url);
-        this.ws.onopen = () => {
-            console.log('Connected to Tether');
-        };
-        this.ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'query') {
-                this.subscribedQueries.forEach((callback, query) => {
-                    if (data.query === query) {
-                        callback(data.data);
-                    }
-                });
-            }
-            else if (data.type === 'error') {
-                console.error(data.error);
-            }
-        };
-        this.ws.onclose = () => {
-            console.log('Disconnected from Tether');
-        };
+        this.websocketHandler.startConnection(url);
     };
     disconnect = () => {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new Error('Not connected to Tether');
-        }
-        this.ws.close();
-        this.ws = null;
+        this.websocketHandler.close();
     };
     subscribe = (query, callback) => {
         this.subscribedQueries.set(query, callback);
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new Error('Not connected to Tether');
-        }
-        this.ws.send(JSON.stringify({
+        this.websocketHandler.send(JSON.stringify({
             type: 'subscribe',
             query: query
         }));
     };
     unsubscribe = (query) => {
         this.subscribedQueries.delete(query);
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new Error('Not connected to Tether');
-        }
-        this.ws.send(JSON.stringify({
+        this.websocketHandler.send(JSON.stringify({
             type: 'unsubscribe',
             query: query
         }));
     };
     sendMutation = (mutationName, params) => {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-            throw new Error('Not connected to Tether');
-        }
-        this.ws.send(JSON.stringify({
+        this.websocketHandler.send(JSON.stringify({
             type: 'mutation',
             name: mutationName,
             payload: params,

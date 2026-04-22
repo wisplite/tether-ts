@@ -1,5 +1,5 @@
 export declare class TetherClient {
-    private ws;
+    private websocketHandler;
     private subscribedQueries;
     connect: (url: string) => void;
     disconnect: () => void;
