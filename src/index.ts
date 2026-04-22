@@ -37,7 +37,7 @@ export class TetherClient {
     sendMutation = (mutationName: string, params: any) => {
         this.websocketHandler.send(JSON.stringify({
             type: 'mutation',
-            name: mutationName,
+            location: mutationName,
             params: params,
         }));
     };
