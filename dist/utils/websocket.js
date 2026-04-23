@@ -28,7 +28,7 @@ export class WebSocketHandler {
                 this.onQuery(data.location, data.data);
             }
             else if (data.type === 'mutation') {
-                this.onMutation(data.data);
+                this.onMutation(data.mutation_id || '', data.data);
             }
             else if (data.type === 'error') {
                 console.error(data.error);

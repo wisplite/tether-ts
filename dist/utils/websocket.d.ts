@@ -8,7 +8,7 @@ export declare class WebSocketHandler {
     private maxReconnectAttempts;
     private reconnectInterval;
     private sendQueue;
-    onMutation: (data: any) => void;
+    onMutation: (mutation_id: string, data: any) => void;
     startConnection: (url: string) => void;
     attemptReconnect: () => void;
     close: () => void;

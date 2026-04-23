@@ -47,8 +47,8 @@ export class TetherClient {
             mutation_id: mutation_id
         }));
         return new Promise((resolve, reject) => {
-            this.websocketHandler.onMutation = (data) => {
-                if (data.mutation_id === mutation_id) {
+            this.websocketHandler.onMutation = (mutation_id, data) => {
+                if (mutation_id === mutation_id) {
                     resolve(data);
                 }
             };

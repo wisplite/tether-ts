@@ -8,7 +8,7 @@ export class WebSocketHandler {
     private maxReconnectAttempts: number = 5;
     private reconnectInterval: number = 1000;
     private sendQueue: string[] = [];
-    public onMutation: (data: any) => void = () => {};
+    public onMutation: (mutation_id: string, data: any) => void = () => {};
     startConnection = (url: string) => {
         this.url = url;
         this.ws = new WebSocket(url);
@@ -30,11 +30,12 @@ export class WebSocketHandler {
                 location?: string;
                 data?: unknown;
                 error?: string;
+                mutation_id?: string;
             };
             if (data.type === 'query') {
                 this.onQuery(data.location, data.data);
             } else if (data.type === 'mutation') {
-                this.onMutation(data.data);
+                this.onMutation(data.mutation_id || '', data.data);
             } else if (data.type === 'error') {
                 console.error(data.error);
             }
