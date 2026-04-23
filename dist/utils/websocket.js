@@ -8,6 +8,7 @@ export class WebSocketHandler {
     maxReconnectAttempts = 5;
     reconnectInterval = 1000;
     sendQueue = [];
+    onMutation = () => { };
     startConnection = (url) => {
         this.url = url;
         this.ws = new WebSocket(url);
@@ -25,6 +26,9 @@ export class WebSocketHandler {
             const data = JSON.parse(String(event.data));
             if (data.type === 'query') {
                 this.onQuery(data.location, data.data);
+            }
+            else if (data.type === 'mutation') {
+                this.onMutation(data.data);
             }
             else if (data.type === 'error') {
                 console.error(data.error);

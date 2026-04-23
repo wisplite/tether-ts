@@ -39,10 +39,22 @@ export class TetherClient {
         }));
     };
     sendMutation = (mutationName, params) => {
+        const mutation_id = crypto.randomUUID();
         this.websocketHandler.send(JSON.stringify({
             type: 'mutation',
             location: mutationName,
             params: params,
+            mutation_id: mutation_id
         }));
+        return new Promise((resolve, reject) => {
+            this.websocketHandler.onMutation = (data) => {
+                if (data.mutation_id === mutation_id) {
+                    resolve(data);
+                }
+            };
+            setTimeout(() => {
+                reject(new Error('Mutation timeout'));
+            }, 10000);
+        });
     };
 }
