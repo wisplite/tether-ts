@@ -47,14 +47,15 @@ export class TetherClient {
             mutation_id: mutation_id
         }));
         return new Promise((resolve, reject) => {
-            this.websocketHandler.onMutation = (mutation_id, data) => {
-                if (mutation_id === mutation_id) {
+            const timeoutId = setTimeout(() => {
+                reject(new Error('Mutation timeout'));
+            }, 10000);
+            this.websocketHandler.onMutation = (incoming_id, data) => {
+                if (incoming_id === mutation_id) {
+                    clearTimeout(timeoutId);
                     resolve(data);
                 }
             };
-            setTimeout(() => {
-                reject(new Error('Mutation timeout'));
-            }, 10000);
         });
     };
 }
