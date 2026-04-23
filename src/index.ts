@@ -36,6 +36,13 @@ export class TetherClient {
                 }));
             });
         };
+        this.websocketHandler.onClose = () => {
+            this.pendingMutations.forEach(pending => {
+                clearTimeout(pending.timeoutId);
+                pending.reject(new Error('Connection closed'));
+            });
+            this.pendingMutations.clear();
+        };
     };
     
     disconnect = () => {
