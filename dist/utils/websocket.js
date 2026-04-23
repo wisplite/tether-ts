@@ -23,7 +23,14 @@ export class WebSocketHandler {
             this.reconnectAttempts = 0;
         };
         ws.onmessage = (event) => {
-            const data = JSON.parse(String(event.data));
+            let data;
+            try {
+                data = JSON.parse(String(event.data));
+            }
+            catch (e) {
+                console.error('Tether: invalid JSON message', event.data, e);
+                return;
+            }
             if (data.type === 'query') {
                 this.onQuery(data.location, data.data);
             }
@@ -34,8 +41,8 @@ export class WebSocketHandler {
                 console.error(data.error);
             }
         };
-        ws.onclose = () => {
-            console.log('Disconnected from Tether');
+        ws.onclose = (event) => {
+            console.log('Disconnected from Tether', 'code:', event.code, 'reason:', event.reason || '(none)', 'wasClean:', event.wasClean);
             this.attemptReconnect();
         };
     };

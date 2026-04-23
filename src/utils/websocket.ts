@@ -25,13 +25,19 @@ export class WebSocketHandler {
         };
 
         ws.onmessage = (event: MessageEvent) => {
-            const data = JSON.parse(String(event.data)) as {
+            let data: {
                 type: string;
                 location?: string;
                 data?: unknown;
                 error?: string;
                 mutation_id?: string;
             };
+            try {
+                data = JSON.parse(String(event.data));
+            } catch (e) {
+                console.error('Tether: invalid JSON message', event.data, e);
+                return;
+            }
             if (data.type === 'query') {
                 this.onQuery(data.location, data.data);
             } else if (data.type === 'mutation') {
@@ -41,8 +47,16 @@ export class WebSocketHandler {
             }
         };
 
-        ws.onclose = () => {
-            console.log('Disconnected from Tether');
+        ws.onclose = (event: CloseEvent) => {
+            console.log(
+                'Disconnected from Tether',
+                'code:',
+                event.code,
+                'reason:',
+                event.reason || '(none)',
+                'wasClean:',
+                event.wasClean
+            );
             this.attemptReconnect();
         };
     };
