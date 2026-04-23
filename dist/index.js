@@ -6,16 +6,25 @@ export class TetherClient {
         this.websocketHandler.startConnection(url);
         this.websocketHandler.onQuery = (location, data) => {
             if (location) {
-                const callback = this.subscribedQueries.get(location);
+                const { callback } = this.subscribedQueries.get(location) || { callback: () => { } };
                 callback?.(data);
             }
+        };
+        this.websocketHandler.onOpen = () => {
+            this.subscribedQueries.forEach(({ params }, queryName) => {
+                this.websocketHandler.send(JSON.stringify({
+                    type: 'subscribe',
+                    location: queryName,
+                    params: params
+                }));
+            });
         };
     };
     disconnect = () => {
         this.websocketHandler.close();
     };
     subscribe = (queryName, params, callback) => {
-        this.subscribedQueries.set(queryName, callback);
+        this.subscribedQueries.set(queryName, { callback, params });
         this.websocketHandler.send(JSON.stringify({
             type: 'subscribe',
             location: queryName,
