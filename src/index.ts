@@ -1,15 +1,24 @@
 import { WebSocketHandler } from './utils/websocket.js';
 export class TetherClient {
     private websocketHandler: WebSocketHandler = new WebSocketHandler();
-    private subscribedQueries = new Map<string, (data: any) => void>();
+    private subscribedQueries = new Map<string, { callback: (data: any) => void, params: any }>();
 
     connect = (url: string) => {
         this.websocketHandler.startConnection(url);
         this.websocketHandler.onQuery = (location, data) => {
             if (location) {
-                const callback = this.subscribedQueries.get(location);
+                const { callback } = this.subscribedQueries.get(location) || { callback: () => {} };
                 callback?.(data);
             }
+        };
+        this.websocketHandler.onOpen = () => {
+            this.subscribedQueries.forEach(({ params }, queryName) => {
+                this.websocketHandler.send(JSON.stringify({
+                    type: 'subscribe',
+                    location: queryName,
+                    params: params
+                }));
+            });
         };
     };
     
@@ -18,7 +27,7 @@ export class TetherClient {
     };
     
     subscribe = (queryName: string, params: any, callback: (data: any) => void) => {
-        this.subscribedQueries.set(queryName, callback);
+        this.subscribedQueries.set(queryName, { callback, params });
         this.websocketHandler.send(JSON.stringify({
             type: 'subscribe',
             location: queryName,
