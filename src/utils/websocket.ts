@@ -9,6 +9,7 @@ export class WebSocketHandler {
     private reconnectInterval: number = 1000;
     private sendQueue: string[] = [];
     public onMutation: (mutation_id: string, data: any) => void = () => {};
+    public onAuth: (data: any) => void = () => {};
     startConnection = (url: string) => {
         this.url = url;
         this.ws = new WebSocket(url);
@@ -44,6 +45,8 @@ export class WebSocketHandler {
                 this.onMutation(data.mutation_id || '', data.data);
             } else if (data.type === 'error') {
                 console.error(data.error);
+            } else if (data.type === 'auth') {
+                this.onAuth(data.data);
             }
         };
 

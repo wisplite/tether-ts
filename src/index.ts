@@ -9,7 +9,11 @@ export class TetherClient {
     private websocketHandler: WebSocketHandler = new WebSocketHandler();
     private subscribedQueries = new Map<string, { callback: (data: any) => void, params: any }>();
     private pendingMutations = new Map<string, PendingMutation>();
+    private authMethod: Function | null = null;
+    private authenticated: boolean = false;
+    private userInfo: Map<string, any> = new Map();
 
+    
     connect = (url: string) => {
         this.websocketHandler.startConnection(url);
         this.websocketHandler.onQuery = (location, data) => {
@@ -27,7 +31,15 @@ export class TetherClient {
             this.pendingMutations.delete(incoming_id);
             pending.resolve(data);
         };
+        this.websocketHandler.onAuth = (data) => {
+            this.authenticated = true;
+            this.userInfo.set('user_id', data.user_id);
+        };
         this.websocketHandler.onOpen = () => {
+            this.websocketHandler.send(JSON.stringify({
+                type: 'auth',
+                token: this.authMethod?.()
+            }));
             this.subscribedQueries.forEach(({ params }, queryName) => {
                 this.websocketHandler.send(JSON.stringify({
                     type: 'subscribe',
@@ -42,6 +54,7 @@ export class TetherClient {
                 pending.reject(new Error('Connection closed'));
             });
             this.pendingMutations.clear();
+            this.authenticated = false;
         };
     };
     
@@ -82,5 +95,9 @@ export class TetherClient {
             mutation_id: mutation_id
         }));
         return promise;
+    };
+
+    setAuthMethod = (authMethod: Function) => { // Function that returns a token
+        this.authMethod = authMethod;
     };
 }
